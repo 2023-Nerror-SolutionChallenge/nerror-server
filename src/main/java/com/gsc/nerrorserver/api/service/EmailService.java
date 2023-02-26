@@ -15,7 +15,6 @@ import java.util.Random;
 @RequiredArgsConstructor
 public class EmailService {
 
-//    @Autowired 대신 @RequiredArgsConstructor 사용했음
     private final JavaMailSender emailSender;
 
     public static final String ePw = createKey();
@@ -41,8 +40,8 @@ public class EmailService {
         msgg+= "CODE : <strong>";
         msgg+= ePw+"</strong><div><br/> ";
         msgg+= "</div>";
-        message.setText(msgg, "utf-8", "html");//내용 지정
-        message.setFrom(new InternetAddress("marbonkr@gmail.com","Marbon"));//보내는 사람 지정
+        message.setText(msgg, "utf-8", "html"); //내용 지정
+        message.setFrom(new InternetAddress("marbonkr@gmail.com","Marbon")); //보내는 사람 지정
 
         return message;
     }
@@ -74,7 +73,7 @@ public class EmailService {
     }
 
     public String sendSimpleMessage(String to) throws Exception {
-        // TODO Auto-generated method stub
+
         MimeMessage message = createMessage(to);
         log.info(String.valueOf(message));
 
@@ -83,7 +82,6 @@ public class EmailService {
             log.info("이메일 전송에 성공했음다");
         } catch(MailException es){
             es.printStackTrace();
-            log.info("이메일 전송에 실패...했음다 왜냐면 니가 넘겨준게null값이거든요");
             throw new IllegalArgumentException();
         }
         return ePw; // 반환값
