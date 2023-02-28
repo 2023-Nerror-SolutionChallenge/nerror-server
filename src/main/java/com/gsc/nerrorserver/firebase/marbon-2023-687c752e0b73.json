@@ -1,0 +1,12 @@
+{
+  "type": "service_account",
+  "project_id": "marbon-2023",
+  "private_key_id": "687c752e0b7355d5e6649d9e7a0ec0a67b325212",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQC5qrjI7JaAp17K\nVSeM3qy7h0Fx/xZW6/1HOa3t4x0JZMmjULdTGApRUqAE6+lfEyjvFuU6CJijrZt0\nxhkT8ltOJ/oQu2jyyZ2CWN8HKyJ2+ijDtPLwuzBAOdyNvfdXEKaXJ0N4ZyMNSI6X\nEw1OVY1SIBAmJCIm8YtDVP+IB33AyPhdFdkOpornm/7Wjhm8L3bQ6FBCu+U11/q8\nJukKs//QJRieolTksxFZ+N5gqvrowbGOT0gRTFZBBaOh0j2LGDWWdKeMMCyPq07o\n0MpaXbnCedAE/69Q/QK4Og+wDpoDJHO+acy7OO/gpa780keRfQgNH1TyUZamrBbF\n5ifYYDEFAgMBAAECggEANjfWkkYUhSlbEvbe/9Ie2vxabjGxklyDsAL1+Zvy5MVb\n5Kczgb5pdOoN9KH3ml37/CXRdqr/9/xAg08+D4cchqxB6BTyRsP9jQzqxCsie1/9\n+3ih4Q6ovninIXUx/2jLXSSIHWbw43YmvZNAtXliNXNLg/fVSU4L/vOZU13sqRkH\nTD5midsyo8kTyMrH+k9upYic16ZNprsenuEBv49anQQWW29fAr+muJvTvRxm/Ada\nnXm1XBf+Jko1y/NdYkC8jV/5uQWvNqscqThewTudNvqGp9tJb33WsMtuNQ6OrLrn\ni1iJSxaxiXGI+SP/TkIILZrBK3kvTQ/YT0x8qT5WWQKBgQDrIX7O3KbWHOIeSR/X\nKpeTTxqcyi4ysWk9G+pYOOQdk0Z1HRi+LbZIpfqOHGBoJFD1J6FQcpmJoCzzvYbg\no0Nieg8l3jRkjp2H/NekFziZ+WjFAA+psrC+xSodGZ92gQKs4SV9E5loCvkGL+Fz\nHpDvLCe5Rs7ufETQBY03UzKIgwKBgQDKJVXiuypRNDC/KpjrvY51dXQZnE6Yoh4/\n3B1qsFshjqvQ90EpiLIfkRmfrx1Hc6RA846MSg93+lSiATnEr5FsRUt853vYUZpY\nuLNZ385UzVLjIBe7or+mH+zw8v1O25mL7IqwnOU2xWTtyaMbNRP665NheqC3i5vT\n6XTKPX5Z1wKBgH3mzZPOqrbzeFBnL1lzQP5r2QAjcmFKheNm0zCyJdOATLXhAqKy\nr2xvE56Mq0KYT5E1yzbcZkI/NlK9JT+brDVKzlmkhcFibA+o337JwFESL3ts8PYY\n7HL59/blBXHa2qffVseGexou5fDeKoYN0+V9azfWJm+ksuQAVQFO1zwpAoGBAK5e\nBDaeggMnxMCxatU2XnL9TJdm1/kbJoKpSQqlcwaAPb7z+NZt3lASZoryj4v5uX55\nWMW0gKFaYrSX4A/D7en54AKu3ooa4cuUDskAn8dQkSXvoektmqkestComU3zaQBk\nmsF7pNBY9xWSL8qhP0na+PdFwupwV4s0vpRQ9PNjAoGBAJQ7UD3tmssr3lM2/lrM\n8Te7MVfEqjL7nEaVj9OUPr3/RcYQZZgZL5lB7vqMqfXnwiJ9QXpxOYiS842ooUDP\nM5QKeEYbQ2kPjvDvl9cPE0K2ATOxIRW4OzdsHu7hqz6P7Yp6EyK7eGNgkgyKw/sc\nx1nOwqfydL7UetNg85lawd79\n-----END PRIVATE KEY-----\n",
+  "client_email": "marbon-2023@appspot.gserviceaccount.com",
+  "client_id": "105757197348680734269",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/marbon-2023%40appspot.gserviceaccount.com"
+}

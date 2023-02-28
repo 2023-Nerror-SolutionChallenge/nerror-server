@@ -23,8 +23,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     private final JwtUtil jwtUtil;
 
     @Override
-    // HTTP 요청이 오면 WAS(tomcat)가 HttpServletRequest, HttpServletResponse 객체를 생성
-    // 만든 인자 값을 받아옵니다.
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         // UsernamePasswordAuthenticationFilter 보다 선행되어 실행되며, 딱 한번만 실행
 

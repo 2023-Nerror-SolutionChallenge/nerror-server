@@ -1,14 +1,17 @@
 package com.gsc.nerrorserver.api.service;
 
+import com.google.api.core.ApiFuture;
+import com.google.cloud.firestore.Firestore;
+import com.google.firebase.cloud.FirestoreClient;
 import com.gsc.nerrorserver.api.auth.JwtUtil;
 import com.gsc.nerrorserver.api.auth.UserDetailsImpl;
 import com.gsc.nerrorserver.api.entity.Member;
 import com.gsc.nerrorserver.api.entity.RefreshToken;
-import com.gsc.nerrorserver.api.repository.MemberRepository;
 import com.gsc.nerrorserver.api.repository.RefreshTokenRepository;
 import com.gsc.nerrorserver.api.service.dto.LoginRequestDto;
 import com.gsc.nerrorserver.api.service.dto.SignupRequestDto;
 import com.gsc.nerrorserver.api.service.dto.TokenResponseDto;
+import com.gsc.nerrorserver.firebase.FirebaseService;
 import com.gsc.nerrorserver.response.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,14 +30,15 @@ import javax.servlet.http.HttpServletResponse;
 @RequiredArgsConstructor
 public class MemberService {
 
-    private final MemberRepository memberRepository;
+//    private final MemberRepository memberRepository;
     private final RefreshTokenRepository refreshTokenRepository;
     private final JwtUtil jwtUtil;
     private final PasswordEncoder passwordEncoder;
+    private final FirebaseService firebaseService;
 
     /* 회원가입 */
     @Transactional
-    public void signup(HttpServletResponse res, SignupRequestDto signupRequestDto) {
+    public void signup(HttpServletResponse res, SignupRequestDto signupRequestDto) throws Exception {
 
         // 비밀번호 암호화
         String encodedPassword = passwordEncoder.encode(signupRequestDto.getPassword());
@@ -45,8 +49,12 @@ public class MemberService {
                 .password(encodedPassword)
                 .picture(signupRequestDto.getPicture())
                 .build();
-        memberRepository.save(member);
+//        memberRepository.save(member);
 
+        // 파이어베이스 Realtime DB 저장
+        firebaseService.saveMember(member);
+
+        // 토큰 생성
         TokenResponseDto tokenResponseDto = jwtUtil.createAllToken(signupRequestDto.getEmail()); // 토큰 생성
 
         // Refresh Token DB 저장
@@ -62,15 +70,20 @@ public class MemberService {
     /* 로그인 */
     @Transactional
     public void login(HttpServletResponse res, LoginRequestDto loginRequestDto) throws Exception {
-        Member member = memberRepository.findByEmail(loginRequestDto.getEmail()).orElseThrow(
-                () -> new BadCredentialsException("존재하지 않는 이메일입니다.")
-        );
-
-        if (!passwordEncoder.matches(loginRequestDto.getPassword(), member.getPassword())) {
-            throw new BadCredentialsException("비밀번호가 일치하지 않습니다.");
+        // 존재하지 않는 회원에 대한 에러처리
+        if (!firebaseService.existsMemberByEmail(loginRequestDto.getEmail())) {
+            throw new BadCredentialsException("존재하지 않는 이메일입니다.");
         }
 
-        TokenResponseDto tokenResponseDto = jwtUtil.createAllToken(member.getEmail());
-        jwtUtil.setHeaderToken(res, tokenResponseDto);
+        else {
+            Member member = firebaseService.findByEmail(loginRequestDto.getEmail());
+
+            if (!passwordEncoder.matches(loginRequestDto.getPassword(), member.getPassword())) {
+                throw new BadCredentialsException("비밀번호가 일치하지 않습니다.");
+            }
+
+            TokenResponseDto tokenResponseDto = jwtUtil.createAllToken(member.getEmail());
+            jwtUtil.setHeaderToken(res, tokenResponseDto);
+        }
     }
 }

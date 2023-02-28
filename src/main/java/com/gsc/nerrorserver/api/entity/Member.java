@@ -11,29 +11,18 @@ import javax.persistence.*;
 import java.util.Collection;
 
 @Getter
-@AllArgsConstructor
 @NoArgsConstructor
-@Entity
 public class Member extends BaseTimeEntity implements UserDetails {
-
-    @Id
-    @Column(name = "member_id")
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
 
     private String email;
     private String password;
     private String nickname;
     private String picture;
 
-    @Column(name = "deleted_count")
     private int deletedCount;
-
-    @Column(name = "current_level")
     private int currentLevel;
-
-    @Column(name = "total_count")
     private int totalCount;
+
 
     // 회원가입용
     @Builder
