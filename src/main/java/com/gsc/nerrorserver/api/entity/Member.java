@@ -1,20 +1,23 @@
 package com.gsc.nerrorserver.api.entity;
 
-import lombok.AllArgsConstructor;
+import com.google.errorprone.annotations.Keep;
+import com.google.firebase.database.IgnoreExtraProperties;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import javax.persistence.*;
 import java.util.Collection;
 
 @Getter
+@Setter
+@IgnoreExtraProperties
 @NoArgsConstructor
 public class Member extends BaseTimeEntity implements UserDetails {
 
-    private String email;
+    private String id;
     private String password;
     private String nickname;
     private String picture;
@@ -23,20 +26,15 @@ public class Member extends BaseTimeEntity implements UserDetails {
     private int currentLevel;
     private int totalCount;
 
-
     // 회원가입용
     @Builder
-    public Member(String email, String password, String nickname, String picture) {
-        this.email = email;
+    public Member(String id, String password, String nickname, String picture) {
+        this.id = id;
         this.password = password;
         this.nickname = nickname;
         this.picture = picture;
-        this.currentLevel = 0;
     }
 
-//    public void setMember(Member member) {
-//        this.member = member;
-//    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -50,7 +48,7 @@ public class Member extends BaseTimeEntity implements UserDetails {
 
     @Override
     public String getUsername() {
-        return this.email;
+        return this.id;
     }
 
     // 계정 만료되었는지 (true - 만료 안됨)

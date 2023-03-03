@@ -5,6 +5,7 @@ build/
 !**/src/main/**/build/
 !**/src/test/**/build/
 **/src/main/resources/application.properties
+**/src/main/resources/application.yml
 **/src/main/java/com/gsc/nerrorserver/firebase/marbon-2023-687c752e0b73.json
 
 ### STS ###

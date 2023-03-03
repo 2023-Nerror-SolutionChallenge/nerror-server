@@ -16,11 +16,11 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     private final FirebaseService firebaseService;
 
     @Override
-    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+    public UserDetails loadUserByUsername(String id) throws UsernameNotFoundException {
         Member member = null;
 
         try {
-            member = firebaseService.findByEmail(email);
+            member = firebaseService.findById(id);
             UserDetailsImpl userDetails = new UserDetailsImpl();
             userDetails.setMember(member);
 

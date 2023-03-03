@@ -5,7 +5,7 @@ import lombok.Data;
 @Data
 public class SignupRequestDto {
 
-    String email;
+    String id; // 이메일
     String password;
     String nickname;
     String picture;

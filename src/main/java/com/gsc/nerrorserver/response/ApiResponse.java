@@ -19,6 +19,7 @@ public class ApiResponse<T> {
 
     //custom
     private final static int UNAUTHORIZED = 401;
+    private final static int FORBIDDEN = 403;
     private final static int CONFLICT = 409;
 
     private final static String SUCCESS_MESSAGE = "(200) SUCCESS";
