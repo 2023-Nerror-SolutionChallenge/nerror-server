@@ -72,6 +72,7 @@ public class AuthController {
             firebaseService.addAccount(dto);
             return ApiResponse.success("msg", "계정 추가에 성공했습니다.");
         } catch (Exception e) {
+            e.printStackTrace();
             res.setStatus(HttpServletResponse.SC_FORBIDDEN);
             return ApiResponse.fail();
         }
@@ -80,7 +81,7 @@ public class AuthController {
     @PostMapping("/saveMailData")
     public ApiResponse saveMailData(HttpServletResponse res, @RequestBody MailReceiveDto dto) {
         try {
-            mailService.readInboundMails(dto);
+            firebaseService.saveMailData(dto);
             return ApiResponse.success("msg", "메세지를 읽어오는 데에 성공했습니다.");
         } catch (Exception e) {
             e.printStackTrace();

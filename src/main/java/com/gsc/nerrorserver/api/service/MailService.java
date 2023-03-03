@@ -34,8 +34,6 @@ public class MailService {
 
     private final JavaMailSender emailSender;
 
-    private final FirebaseService firebaseService;
-
     public static final String ePw = createKey();
 
     private MimeMessage createMessage(String to)throws Exception{
@@ -106,7 +104,24 @@ public class MailService {
         return ePw; // 반환값
     }
 
-    public void readInboundMails(MailReceiveDto dto) {
+    public int readInboundMailCount(MailReceiveDto dto) throws Exception {
+        Properties props = System.getProperties();
+        props.setProperty("mail.store.protocol", "imaps");
+
+        Session session = Session.getDefaultInstance(props, new MailAuthenticator(dto.getUsername(), dto.getPassword()));
+        Store store = session.getStore("imaps");
+        store.connect(dto.getHost(), dto.getUsername(), dto.getPassword());
+
+        Folder inbox = store.getFolder("INBOX"); // inbox = 받은편지함
+        inbox.open(Folder.READ_ONLY);
+        int count = inbox.getMessageCount();
+        inbox.close(false);
+        store.close();
+
+        return count;
+    }
+
+    public Collection<MailData> readInboundMails(MailReceiveDto dto) throws Exception {
 
         String protocol = "imaps"; //imaps
 
@@ -119,82 +134,103 @@ public class MailService {
 
         Properties props = System.getProperties();
         props.setProperty("mail.store.protocol", protocol);
-        try {
-            Session session = Session.getDefaultInstance(props, new MailAuthenticator(username, password));
-            Store store = session.getStore(protocol);
-            store.connect(host, port, username, password);
 
-            Folder inbox = store.getFolder("INBOX"); // inbox = 받은편지함
-            inbox.open(Folder.READ_WRITE);
+        Session session = Session.getDefaultInstance(props, new MailAuthenticator(username, password));
+        Store store = session.getStore(protocol);
+        store.connect(host, port, username, password);
 
-            // 받은 편지함에 있는 메일 모두 읽어오기
-            Message[] arrayMessages = inbox.getMessages();
-            int msgCount = arrayMessages.length - 1;
-            for (int i = msgCount; i>0; i--) {
-                Message msg = arrayMessages[i-1];
+        Folder inbox = store.getFolder("INBOX"); // inbox = 받은편지함
+        inbox.open(Folder.READ_WRITE);
 
-                // 메일 내용 읽어오기
-                String from = msg.getFrom()[0].toString();
-                String subject = msg.getSubject();
-                String contentType = msg.getContentType();
-                Date receivedDate = msg.getReceivedDate();
-                String messageContent = ""; // 메일 내용
-                Collection<MimeBodyPart> attachments = new ArrayList<>();
+        // 받은 편지함에 있는 메일 모두 읽어오기
+        Message[] arrayMessages = inbox.getMessages();
+        int msgCount = arrayMessages.length - 1;
+        String from="", subject="", contentType="", messageContent="";
+        Date receivedDate;
 
-                // 멀티파트 첨부파일 처리 - 파트별로 일일이 검사해서 저장해줘야 함
-                if (contentType.contains("multipart")) {
-                    Multipart multipart = (Multipart) msg.getContent();
-                    int numberOfParts = multipart.getCount();
-                    for (int partCount = 0; partCount<numberOfParts; partCount++) {
-                        MimeBodyPart part = (MimeBodyPart) multipart.getBodyPart(partCount);
-                        // 첨부파일이 있는 경우
-                        if (Part.ATTACHMENT.equalsIgnoreCase(part.getDisposition())) {
-                            String fileName = part.getFileName();
-                            log.info("파일 제목 : " + i + fileName); // 파일 정보 출력
-                            attachments.add(part);
-                        } else { // 없으면 메일 내용만 저장
-                            messageContent = part.getContent().toString();
-                        }
-                    }
-                } else if (contentType.contains("text/plain") || contentType.contains("text/html")) {
-                    Object content = msg.getContent();
-                    if (content != null) {
-                        messageContent = content.toString();
-                        log.info(messageContent);
-                    }
+        for (Message msg : arrayMessages) {
+            from = msg.getFrom()[0].toString();
+            subject = msg.getSubject();
+            contentType = msg.getContentType();
+            receivedDate = msg.getReceivedDate();
+            log.info("제목 : " + subject);
+
+            if (contentType.contains("multipart")) {
+                // 멀티파트 처리
+            } else {
+                Object content = msg.getContent();
+                if (content != null) {
+                    messageContent = content.toString();
+//                    log.info("메일 내용 : " + messageContent);
                 }
-
-                String removeTag = messageContent.replaceAll("<(/)?([a-zA-Z]*)(\\s[a-zA-Z]*=[^>]*)?(\\s)*(/)?>", "");
-                MailData data = MailData.builder()
-                        .subject(subject)
-                        .from(from)
-                        .contents(removeTag)
-                        .receivedDate(receivedDate)
-                        .build();
-
-                // 읽어온 메일 로그로 출력
-                log.info("mail count : " + (i+1));
-                log.info("발신자: " + from);
-                log.info("제목: " + subject);
-                log.info("첨부파일 목록: " + attachments);
-//                log.info("내용: " + messageContent);
-
-                firebaseService.saveMailData(dto, data);
             }
-
-            // 메일박스와 연결 끊기
-            inbox.close(false);
-            store.close();
-
-        } catch (NoSuchProviderException e) {
-            e.printStackTrace();
-        } catch (MessagingException e) {
-            e.printStackTrace();
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new RuntimeException("메일을 저장하는 과정에서 오류가 발생했습니다.");
+            String removeTag = messageContent.replaceAll("<(/)?([a-zA-Z]*)(\\s[a-zA-Z]*=[^>]*)?(\\s)*(/)?>", "");
+            MailData data = MailData.builder()
+                    .subject(subject)
+                    .from(from)
+                    .contents(removeTag)
+                    .receivedDate(receivedDate)
+                    .build();
+            mailList.add(data);
         }
+
+//            for (int i = msgCount; i>0; i--) {
+//                Message msg = arrayMessages[i-1];
+//
+//                // 메일 내용 읽어오기
+//                String from = msg.getFrom()[0].toString();
+//                String subject = msg.getSubject();
+//                String contentType = msg.getContentType();
+//                Date receivedDate = msg.getReceivedDate();
+//                String messageContent = ""; // 메일 내용
+//                Collection<MimeBodyPart> attachments = new ArrayList<>();
+//
+//                // 멀티파트 첨부파일 처리 - 파트별로 일일이 검사해서 저장해줘야 함
+//                if (contentType.contains("multipart")) {
+//                    Multipart multipart = (Multipart) msg.getContent();
+//                    int numberOfParts = multipart.getCount();
+//                    for (int partCount = 0; partCount<numberOfParts; partCount++) {
+//                        MimeBodyPart part = (MimeBodyPart) multipart.getBodyPart(partCount);
+//                        // 첨부파일이 있는 경우
+//                        if (Part.ATTACHMENT.equalsIgnoreCase(part.getDisposition())) {
+//                            String fileName = part.getFileName();
+//                            log.info("파일 제목 : " + i + fileName); // 파일 정보 출력
+//                            attachments.add(part);
+//                        } else { // 없으면 메일 내용만 저장
+//                            messageContent = part.getContent().toString();
+//                        }
+//                    }
+//                } else if (contentType.contains("text/plain") || contentType.contains("text/html")) {
+//                    Object content = msg.getContent();
+//                    if (content != null) {
+//                        messageContent = content.toString();
+//                        log.info(messageContent);
+//                    }
+//                }
+//
+//                String removeTag = messageContent.replaceAll("<(/)?([a-zA-Z]*)(\\s[a-zA-Z]*=[^>]*)?(\\s)*(/)?>", "");
+//                MailData data = MailData.builder()
+//                        .subject(subject)
+//                        .from(from)
+//                        .contents(removeTag)
+//                        .receivedDate(receivedDate)
+//                        .build();
+//
+//                // 읽어온 메일 로그로 출력
+//                log.info("mail count : " + (i+1));
+//                log.info("발신자: " + from);
+//                log.info("제목: " + subject);
+//                log.info("첨부파일 목록: " + attachments);
+////                log.info("내용: " + messageContent);
+//
+//                firebaseService.saveMailData(dto, data);
+//            }
+
+        // 메일박스와 연결 끊기
+        inbox.close(false);
+        store.close();
+
+        return mailList;
     }
+
 }

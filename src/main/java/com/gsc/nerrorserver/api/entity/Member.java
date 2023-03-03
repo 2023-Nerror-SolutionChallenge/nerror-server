@@ -12,10 +12,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collection;
 
 @Getter
-@Setter
 @IgnoreExtraProperties
 @NoArgsConstructor
-public class Member extends BaseTimeEntity implements UserDetails {
+public class Member implements UserDetails {
 
     private String id;
     private String password;
