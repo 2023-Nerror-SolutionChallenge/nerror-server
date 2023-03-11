@@ -52,7 +52,8 @@ public class MailController {
             MailReceiveDto dto = mailFirebaseService.findMailReceiveDtoById(id, username);
             mailFirebaseService.saveRecentMailData(dto);
             mailFirebaseService.updateCounts(id); // 총 메일 갯수 업데이트
-            return ApiResponse.success("msg", "[새로고침] 메세지 개수를 업데이트했습니다.");
+            mailFirebaseService.getBadge(id);
+            return ApiResponse.success("msg", "[새로고침] 최신 메일을 업데이트하고, 뱃지 설정 및 부여를 완료했습니다.");
         } catch (Exception e) {
             e.printStackTrace();
             res.setStatus(HttpServletResponse.SC_BAD_REQUEST);

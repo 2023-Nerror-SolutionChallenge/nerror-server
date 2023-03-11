@@ -105,21 +105,28 @@ public class MailFirebaseService {
         // DB 저장된 메일 중 receivedDate 기준으로 가장 최신값 쿼리해서, searchTerm으로 넘겨주고 inbox에서 필터링하면 되나?
         Query q = db.collection(COLLECTION_MEMBER).document(dto.getId())
                 .collection(COLLECTION_ACCOUNT_LIST).document(dto.getUsername()).collection(COLLECTION_MAIL_LIST).orderBy("receivedDate", Query.Direction.DESCENDING).limit(1);
-        Date lastUpdatedDate = q.get().get().getDocuments().get(0).getDate("receivedDate");
-        log.info("최신 업데이트 : " + lastUpdatedDate);
+        try {
+            Date lastUpdatedDate = q.get().get().getDocuments().get(0).getDate("receivedDate");
+            log.info("최신 업데이트 : " + lastUpdatedDate);
 
-        Collection<MailData> mailData = mailService.readRecentMails(dto, lastUpdatedDate);
-        for (MailData data : mailData) {
-            List<QueryDocumentSnapshot> documents = ref.whereEqualTo("receivedDate", data.getReceivedDate())
-                    .whereEqualTo("from", data.getFrom())
-                    .get().get().getDocuments();
-            if (documents.isEmpty()) {
-                ApiFuture<DocumentReference> future = ref.add(data);
-                log.info("새로운 메일이 도착했습니다.");
-            } else log.warn("이미 존재하는 메일이므로 저장하지 않습니다. 제목 : {}", data.getSubject());
+            Collection<MailData> mailData = mailService.readRecentMails(dto, lastUpdatedDate);
+            for (MailData data : mailData) {
+                List<QueryDocumentSnapshot> documents = ref.whereEqualTo("receivedDate", data.getReceivedDate())
+                        .whereEqualTo("from", data.getFrom())
+                        .get().get().getDocuments();
+                if (documents.isEmpty()) {
+                    ApiFuture<DocumentReference> future = ref.add(data);
+                    log.info("새로운 메일이 도착했습니다.");
+                } else log.warn("이미 존재하는 메일이므로 저장하지 않습니다. 제목 : {}", data.getSubject());
+            }
+        } catch (IndexOutOfBoundsException e) {
+            // 메일 save 를 안해서 메일 save를 먼저 해줘야 하는 경우
+            saveMailData(dto);
         }
+
     }
 
+    @Transactional
     /* MailReceiveDto DB에서 찾기 (by Id, Username) */
     public MailReceiveDto findMailReceiveDtoById(String id, String username) throws Exception {
         Firestore db = FirestoreClient.getFirestore();
@@ -138,13 +145,33 @@ public class MailFirebaseService {
 
         long currentMailCount = (long) member.getTotalCount();
         long currentDeletedCount = (long) member.getDeletedCount();
-        long deletedRatio = currentDeletedCount / currentMailCount * 100;
+        long deletedRatio = (currentDeletedCount / currentMailCount) * 100;
 
-        if (currentDeletedCount >= 1 && !currentBadgeList.contains(Badge.STARTERS)) currentBadgeList.add(Badge.STARTERS);
-        else if (currentDeletedCount >= 65 && !currentBadgeList.contains(Badge.ENVIRONMENTAL_TUTELARY)) currentBadgeList.add(Badge.ENVIRONMENTAL_TUTELARY);
-        else if (currentDeletedCount >= 422 && !currentBadgeList.contains(Badge.EARTH_TUTELARY)) currentBadgeList.add(Badge.EARTH_TUTELARY);
-        else if (currentMailCount > 10000 && !currentBadgeList.contains(Badge.MAIL_RICH)) currentBadgeList.add(Badge.MAIL_RICH);
-        else if (deletedRatio >= 42.195 && !currentBadgeList.contains(Badge.MARBON_MARATHONER)) currentBadgeList.add(Badge.MARBON_MARATHONER);
-        else if (currentAttendance.size() >= 7 && !currentBadgeList.contains(Badge.ENVIRONMENTAL_MODEL)) currentBadgeList.add(Badge.ENVIRONMENTAL_MODEL);
+        if (currentDeletedCount >= 1 && !currentBadgeList.contains(Badge.STARTERS)) {
+            currentBadgeList.add(Badge.STARTERS);
+            log.info("[뱃지 부여] '{}' 뱃지를 지급했습니다.", Badge.STARTERS.getName());
+        }
+        else if (currentDeletedCount >= 65 && !currentBadgeList.contains(Badge.ENVIRONMENTAL_TUTELARY)) {
+            currentBadgeList.add(Badge.ENVIRONMENTAL_TUTELARY);
+            log.info("[뱃지 부여] '{}' 뱃지를 지급했습니다.", Badge.ENVIRONMENTAL_TUTELARY.getName());
+        }
+        else if (currentDeletedCount >= 422 && !currentBadgeList.contains(Badge.EARTH_TUTELARY)) {
+            currentBadgeList.add(Badge.EARTH_TUTELARY);
+            log.info("[뱃지 부여] '{}' 뱃지를 지급했습니다.", Badge.EARTH_TUTELARY.getName());
+        }
+        else if (currentMailCount > 10000 && !currentBadgeList.contains(Badge.MAIL_RICH)) {
+            currentBadgeList.add(Badge.MAIL_RICH);
+            log.info("[뱃지 부여] '{}' 뱃지를 지급했습니다.", Badge.MAIL_RICH.getName());
+        }
+        else if (deletedRatio >= 42.195 && !currentBadgeList.contains(Badge.MARBON_MARATHONER)) {
+            currentBadgeList.add(Badge.MARBON_MARATHONER);
+            log.info("[뱃지 부여] '{}' 뱃지를 지급했습니다.", Badge.MARBON_MARATHONER.getName());
+        }
+        else if (currentAttendance.size() >= 7 && !currentBadgeList.contains(Badge.ENVIRONMENTAL_MODEL)) {
+            currentBadgeList.add(Badge.ENVIRONMENTAL_MODEL);
+            log.info("[뱃지 부여] '{}' 뱃지를 지급했습니다.", Badge.ENVIRONMENTAL_MODEL.getName());
+        }
+
+        ApiFuture<WriteResult> future = db.collection(COLLECTION_MEMBER).document(id).set(member);
     }
 }
