@@ -80,6 +80,7 @@ public class MemberService {
                 throw new BadCredentialsException("비밀번호가 일치하지 않습니다.");
             }
 
+            memberFirebaseService.addAttendance(member.getId()); // 출석 수 추가
             TokenResponseDto tokenResponseDto = jwtUtil.createAllToken(member.getId());
             jwtUtil.setHeaderToken(res, tokenResponseDto);
         }

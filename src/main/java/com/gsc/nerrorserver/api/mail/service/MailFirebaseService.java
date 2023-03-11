@@ -5,12 +5,15 @@ import com.google.cloud.firestore.*;
 import com.google.firebase.cloud.FirestoreClient;
 import com.gsc.nerrorserver.api.mail.dto.MailReceiveDto;
 import com.gsc.nerrorserver.api.mail.entity.MailData;
+import com.gsc.nerrorserver.api.member.entity.Badge;
+import com.gsc.nerrorserver.api.member.entity.Member;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+import java.util.concurrent.ExecutionException;
 
 @Service
 @RequiredArgsConstructor
@@ -20,6 +23,7 @@ public class MailFirebaseService {
     private final String COLLECTION_MEMBER = "Member";
     private final String COLLECTION_ACCOUNT_LIST = "AccountList";
     private final String COLLECTION_MAIL_LIST = "MailList";
+    private final String COLLECTION_ATTENDANCE = "Attendance";
     private final MailService mailService;
 
     @Transactional
@@ -119,7 +123,28 @@ public class MailFirebaseService {
     /* MailReceiveDto DB에서 찾기 (by Id, Username) */
     public MailReceiveDto findMailReceiveDtoById(String id, String username) throws Exception {
         Firestore db = FirestoreClient.getFirestore();
-        return db.collection("Member").document(id)
-                .collection("AccountList").document(username).get().get().toObject(MailReceiveDto.class);
+        return db.collection(COLLECTION_MEMBER).document(id)
+                .collection(COLLECTION_ACCOUNT_LIST).document(username).get().get().toObject(MailReceiveDto.class);
+    }
+
+    /* 뱃지 부여 -> TODO : 새로고침시 부여할 것인가? */
+    @Transactional
+    public void getBadge(String id) throws Exception {
+
+        Firestore db = FirestoreClient.getFirestore();
+        Member member = db.collection(COLLECTION_MEMBER).document(id).get().get().toObject(Member.class);
+        List<Badge> currentBadgeList = member.getBadgeList();
+        List<String> currentAttendance = member.getAttendance();
+
+        long currentMailCount = (long) member.getTotalCount();
+        long currentDeletedCount = (long) member.getDeletedCount();
+        long deletedRatio = currentDeletedCount / currentMailCount * 100;
+
+        if (currentDeletedCount >= 1 && !currentBadgeList.contains(Badge.STARTERS)) currentBadgeList.add(Badge.STARTERS);
+        else if (currentDeletedCount >= 65 && !currentBadgeList.contains(Badge.ENVIRONMENTAL_TUTELARY)) currentBadgeList.add(Badge.ENVIRONMENTAL_TUTELARY);
+        else if (currentDeletedCount >= 422 && !currentBadgeList.contains(Badge.EARTH_TUTELARY)) currentBadgeList.add(Badge.EARTH_TUTELARY);
+        else if (currentMailCount > 10000 && !currentBadgeList.contains(Badge.MAIL_RICH)) currentBadgeList.add(Badge.MAIL_RICH);
+        else if (deletedRatio >= 42.195 && !currentBadgeList.contains(Badge.MARBON_MARATHONER)) currentBadgeList.add(Badge.MARBON_MARATHONER);
+        else if (currentAttendance.size() >= 7 && !currentBadgeList.contains(Badge.ENVIRONMENTAL_MODEL)) currentBadgeList.add(Badge.ENVIRONMENTAL_MODEL);
     }
 }

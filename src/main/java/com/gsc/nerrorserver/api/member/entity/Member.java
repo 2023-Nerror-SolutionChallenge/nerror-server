@@ -9,7 +9,7 @@ import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.Collection;
+import java.util.*;
 
 @Getter
 @IgnoreExtraProperties
@@ -25,7 +25,11 @@ public class Member implements UserDetails {
     private int currentLevel;
     private int totalCount;
 
-    private Collection<Badge> badgeList;
+    private List<Badge> badgeList;
+    private List<String> attendance; // 출석부는 날짜 중복 xx
+
+//    private Collection<Badge> badgeList;
+//    private Collection<Date> attendance;
 
     // 회원가입용
     @Builder
@@ -34,6 +38,8 @@ public class Member implements UserDetails {
         this.password = password;
         this.nickname = nickname;
         this.picture = picture;
+        this.attendance = new ArrayList<>();
+        this.badgeList = new ArrayList<>();
     }
 
 
