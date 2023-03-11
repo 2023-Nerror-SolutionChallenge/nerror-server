@@ -1,6 +1,9 @@
 package com.gsc.nerrorserver.api.mail.service;
 
 
+import com.google.api.core.ApiFuture;
+import com.google.cloud.firestore.*;
+import com.google.firebase.cloud.FirestoreClient;
 import com.gsc.nerrorserver.api.mail.dto.MailDeleteDto;
 import com.gsc.nerrorserver.api.mail.dto.MailReceiveDto;
 import com.gsc.nerrorserver.api.mail.entity.MailData;
@@ -10,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.mail.MailException;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.mail.*;
 import javax.mail.internet.InternetAddress;
@@ -144,7 +148,6 @@ public class MailService {
             Object content = msg.getContent();
             if (content != null) {
                 messageContent = content.toString();
-//                    log.info("메일 내용 : " + messageContent);
             }
         }
         String removeHtmlTag = messageContent.replaceAll("<(/)?([a-zA-Z]*)(\\s[a-zA-Z]*=[^>]*)?(\\s)*(/)?>", "");
@@ -208,9 +211,7 @@ public class MailService {
         Message[] recentMessages = inbox.search(newerThan);
 
         // 읽어서 데이터 저장
-        for (Message msg : recentMessages) {
-            mailList.add(handleMailData(msg));
-        }
+        for (Message msg : recentMessages) mailList.add(handleMailData(msg));
 
         inbox.close(false);
         store.close();
@@ -221,6 +222,7 @@ public class MailService {
     public void deleteSpecificMail(MailDeleteDto dto) {
 
         // 서버에도 delete 태깅해야 하고, db에서도 삭제해야 함
-        // 프로젝트 구조도 바꿔야돼 ㅠㅠ
+        // 삭제 후 삭제량(deleteCount) 업데이트와 달성한 삭제량만큼 등급 올려야 함
     }
+
 }

@@ -1,66 +1,26 @@
-package com.gsc.nerrorserver.global.firebase;
+package com.gsc.nerrorserver.api.mail.service;
 
 import com.google.api.core.ApiFuture;
 import com.google.cloud.firestore.*;
 import com.google.firebase.cloud.FirestoreClient;
-import com.gsc.nerrorserver.api.mail.entity.MailData;
-import com.gsc.nerrorserver.api.mail.service.MailService;
 import com.gsc.nerrorserver.api.mail.dto.MailReceiveDto;
-import com.gsc.nerrorserver.api.member.entity.Member;
+import com.gsc.nerrorserver.api.mail.entity.MailData;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.mail.search.SearchTerm;
 import java.util.*;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
-public class FirebaseService {
+@Slf4j
+public class MailFirebaseService {
 
-    public static final String COLLECTION_MEMBER = "Member";
-    public static final String COLLECTION_ACCOUNT_LIST = "AccountList";
-    public static final String COLLECTION_MAIL_LIST = "MailList";
+    private final String COLLECTION_MEMBER = "Member";
+    private final String COLLECTION_ACCOUNT_LIST = "AccountList";
+    private final String COLLECTION_MAIL_LIST = "MailList";
     private final MailService mailService;
-
-    /* 사용자 저장 */
-    public void saveMember(Member member) throws Exception {
-
-        Firestore db = FirestoreClient.getFirestore();
-        ApiFuture<WriteResult> future = db.collection(COLLECTION_MEMBER).document(member.getId()).set(member);
-        log.info(member + " 저장이 완료되었습니다.");
-    }
-
-    /* 사용자 조회 (by email) */
-    public Member findById(String email) throws Exception {
-        Firestore db = FirestoreClient.getFirestore();
-        DocumentReference ref = db.collection(COLLECTION_MEMBER).document(email);
-        ApiFuture<DocumentSnapshot> future = ref.get();
-        DocumentSnapshot doc = future.get();
-
-        if (doc.exists()) return doc.toObject(Member.class);
-        else return null;
-    }
-
-    /* 중복검사 (by Id) */
-    public boolean existsMemberById(String id) throws Exception {
-        Firestore db = FirestoreClient.getFirestore();
-        DocumentReference ref = db.collection(COLLECTION_MEMBER).document(id);
-        ApiFuture<DocumentSnapshot> future = ref.get();
-        DocumentSnapshot doc = future.get();
-        return doc.exists();
-    }
-
-    // 중복검사 (by nickname)
-    public boolean existsMemberByNickname(String nickname) throws Exception {
-        Firestore db = FirestoreClient.getFirestore();
-        Query ref = db.collection(COLLECTION_MEMBER).whereEqualTo("nickname", nickname);
-        ApiFuture<QuerySnapshot> future = ref.get();
-        QuerySnapshot doc = future.get();
-        return !doc.isEmpty();
-    }
 
     @Transactional
     /* 메일 계정 추가 */
@@ -162,10 +122,4 @@ public class FirebaseService {
         return db.collection("Member").document(id)
                 .collection("AccountList").document(username).get().get().toObject(MailReceiveDto.class);
     }
-
-    @Transactional
-    public void orderByDesc(String id) {
-
-    }
 }
-

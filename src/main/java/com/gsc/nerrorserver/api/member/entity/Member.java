@@ -25,6 +25,8 @@ public class Member implements UserDetails {
     private int currentLevel;
     private int totalCount;
 
+    private Collection<Badge> badgeList;
+
     // 회원가입용
     @Builder
     public Member(String id, String password, String nickname, String picture) {

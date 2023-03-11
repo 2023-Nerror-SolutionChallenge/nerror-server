@@ -1,7 +1,8 @@
 package com.gsc.nerrorserver.api.mail.controller;
 
 import com.gsc.nerrorserver.api.mail.dto.MailReceiveDto;
-import com.gsc.nerrorserver.global.firebase.FirebaseService;
+import com.gsc.nerrorserver.api.mail.service.MailFirebaseService;
+import com.gsc.nerrorserver.api.mail.service.MailService;
 import com.gsc.nerrorserver.global.response.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -13,14 +14,15 @@ import javax.servlet.http.HttpServletResponse;
 @RequestMapping("/api/v1/mailbox")
 public class MailController {
 
-    private final FirebaseService firebaseService;
+    private final MailService mailService;
+    private final MailFirebaseService mailFirebaseService;
 
     /* 메일 계정 추가 API */
     // TODO : 메일함 현황 불러오기, 사용자 레벨 조회
     @PostMapping("/add")
     public ApiResponse addAccount(HttpServletResponse res, @RequestBody MailReceiveDto dto) {
         try {
-            firebaseService.addMailbox(dto);
+            mailFirebaseService.addMailbox(dto);
             return ApiResponse.success("msg", "계정 추가에 성공했습니다.");
         } catch (Exception e) {
             e.printStackTrace();
@@ -33,7 +35,7 @@ public class MailController {
     @PostMapping("/save")
     public ApiResponse saveMailData(HttpServletResponse res, @RequestBody MailReceiveDto dto) {
         try {
-            firebaseService.saveMailData(dto);
+            mailFirebaseService.saveMailData(dto);
             // total count update 쿼리 필요할듯
             return ApiResponse.success("msg", "메세지를 읽어오는 데에 성공했습니다.");
         } catch (Exception e) {
@@ -47,9 +49,9 @@ public class MailController {
     @GetMapping("/refresh")
     public ApiResponse refresh(HttpServletResponse res, @RequestParam(name = "id") String id, @RequestParam(name = "username") String username) {
         try {
-            MailReceiveDto dto = firebaseService.findMailReceiveDtoById(id, username);
-            firebaseService.saveRecentMailData(dto);
-            firebaseService.updateCounts(id); // 총 메일 갯수 업데이트
+            MailReceiveDto dto = mailFirebaseService.findMailReceiveDtoById(id, username);
+            mailFirebaseService.saveRecentMailData(dto);
+            mailFirebaseService.updateCounts(id); // 총 메일 갯수 업데이트
             return ApiResponse.success("msg", "[새로고침] 메세지 개수를 업데이트했습니다.");
         } catch (Exception e) {
             e.printStackTrace();

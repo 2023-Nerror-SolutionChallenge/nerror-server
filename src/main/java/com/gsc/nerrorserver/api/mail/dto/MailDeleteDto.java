@@ -4,11 +4,8 @@ import lombok.Data;
 
 @Data
 public class MailDeleteDto {
-    String id;
-    String username;
-    String password;
-    String host;
-    String port;
+    String id; // 삭제를 원하는 계정 id (이메일 형식)
+    String username; // 삭제를 원하는 계정 이메일
 
-    String keyword; // 삭제 요청 단어
+    String keyword; // 삭제 요청 단어, 필터링 단어
 }

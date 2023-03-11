@@ -2,11 +2,10 @@ package com.gsc.nerrorserver.api.member.controller;
 
 import com.gsc.nerrorserver.api.member.dto.LoginRequestDto;
 import com.gsc.nerrorserver.api.member.dto.MailConfirmDto;
-import com.gsc.nerrorserver.api.mail.dto.MailReceiveDto;
 import com.gsc.nerrorserver.api.member.dto.SignupRequestDto;
 import com.gsc.nerrorserver.api.mail.service.MailService;
+import com.gsc.nerrorserver.api.member.service.MemberFirebaseService;
 import com.gsc.nerrorserver.api.member.service.MemberService;
-import com.gsc.nerrorserver.global.firebase.FirebaseService;
 import com.gsc.nerrorserver.global.response.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -21,8 +20,7 @@ public class MemberController {
 
     private final MailService mailService;
     private final MemberService memberService;
-//    private final MemberRepository memberRepository;
-    private final FirebaseService firebaseService;
+    private final MemberFirebaseService memberFirebaseService;
 
     @PostMapping("/confirm")
     public ApiResponse emailConfirm(@RequestBody MailConfirmDto dto) throws Exception {
@@ -34,13 +32,13 @@ public class MemberController {
     @PostMapping("/signup")
     public ApiResponse signup(HttpServletResponse res, @RequestBody SignupRequestDto dto) throws Exception {
         // 중복가입 방지
-        if (firebaseService.existsMemberById(dto.getId())) {
+        if (memberFirebaseService.existsMemberById(dto.getId())) {
             res.setStatus(HttpServletResponse.SC_CONFLICT);
             return ApiResponse.conflict("error", "존재하는 이메일입니다.");
         }
 
         // 닉네임 중복검사
-        else if (firebaseService.existsMemberByNickname(dto.getNickname())) {
+        else if (memberFirebaseService.existsMemberByNickname(dto.getNickname())) {
             res.setStatus(HttpServletResponse.SC_CONFLICT);
             return ApiResponse.conflict("error", "중복된 닉네임입니다.");
         }
