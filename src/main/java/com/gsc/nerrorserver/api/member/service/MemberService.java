@@ -36,7 +36,7 @@ public class MemberService {
 
     /* 회원가입 */
     @Transactional
-    public void signup(HttpServletResponse res, SignupRequestDto signupRequestDto) throws Exception {
+    public Member signup(HttpServletResponse res, SignupRequestDto signupRequestDto) throws Exception {
 
         // 비밀번호 암호화
         String encodedPassword = passwordEncoder.encode(signupRequestDto.getPassword());
@@ -63,11 +63,12 @@ public class MemberService {
         refreshTokenRepository.save(refreshToken);
 
         jwtUtil.setHeaderToken(res, tokenResponseDto);
+        return member;
     }
 
     /* 로그인 */
     @Transactional
-    public void login(HttpServletResponse res, LoginRequestDto loginRequestDto) throws Exception {
+    public Member login(HttpServletResponse res, LoginRequestDto loginRequestDto) throws Exception {
         // 존재하지 않는 회원에 대한 에러처리
         if (!memberFirebaseService.existsMemberById(loginRequestDto.getId())) {
             throw new BadCredentialsException("존재하지 않는 이메일입니다.");
@@ -83,6 +84,8 @@ public class MemberService {
             memberFirebaseService.addAttendance(member.getId()); // 출석 수 추가
             TokenResponseDto tokenResponseDto = jwtUtil.createAllToken(member.getId());
             jwtUtil.setHeaderToken(res, tokenResponseDto);
+
+            return member;
         }
     }
 

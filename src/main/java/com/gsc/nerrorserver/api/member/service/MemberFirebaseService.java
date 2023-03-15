@@ -39,9 +39,9 @@ public class MemberFirebaseService {
     }
 
     /* 사용자 조회 (by email) */
-    public Member findById(String email) throws Exception {
+    public Member findById(String id) throws Exception {
         Firestore db = FirestoreClient.getFirestore();
-        DocumentReference ref = db.collection(COLLECTION_MEMBER).document(email);
+        DocumentReference ref = db.collection(COLLECTION_MEMBER).document(id);
         ApiFuture<DocumentSnapshot> future = ref.get();
         DocumentSnapshot doc = future.get();
 

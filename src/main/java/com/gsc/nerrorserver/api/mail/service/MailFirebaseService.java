@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
-import java.util.concurrent.ExecutionException;
 
 @Service
 @RequiredArgsConstructor
@@ -23,7 +22,6 @@ public class MailFirebaseService {
     private final String COLLECTION_MEMBER = "Member";
     private final String COLLECTION_ACCOUNT_LIST = "AccountList";
     private final String COLLECTION_MAIL_LIST = "MailList";
-    private final String COLLECTION_ATTENDANCE = "Attendance";
     private final MailService mailService;
 
     @Transactional
@@ -134,9 +132,24 @@ public class MailFirebaseService {
                 .collection(COLLECTION_ACCOUNT_LIST).document(username).get().get().toObject(MailReceiveDto.class);
     }
 
+    @Transactional
+    /* 등록된 MailReceiveDto 모두 찾기 (by id) */
+    public List<MailReceiveDto> findReceiveDtoListById(String id) throws Exception {
+        Firestore db = FirestoreClient.getFirestore();
+        CollectionReference ref = db.collection(COLLECTION_MEMBER).document(id).collection(COLLECTION_ACCOUNT_LIST);
+
+        List<MailReceiveDto> dtoList = new ArrayList<>();
+        for (DocumentReference doc : ref.listDocuments()) {
+            MailReceiveDto dto = doc.get().get().toObject(MailReceiveDto.class);
+            dtoList.add(dto);
+        }
+
+        return dtoList;
+    }
+
     /* 뱃지 부여 -> TODO : 새로고침시 부여할 것인가? */
     @Transactional
-    public void getBadge(String id) throws Exception {
+    public List<Badge> getBadge(String id) throws Exception {
 
         Firestore db = FirestoreClient.getFirestore();
         Member member = db.collection(COLLECTION_MEMBER).document(id).get().get().toObject(Member.class);
@@ -173,5 +186,6 @@ public class MailFirebaseService {
         }
 
         ApiFuture<WriteResult> future = db.collection(COLLECTION_MEMBER).document(id).set(member);
+        return currentBadgeList;
     }
 }

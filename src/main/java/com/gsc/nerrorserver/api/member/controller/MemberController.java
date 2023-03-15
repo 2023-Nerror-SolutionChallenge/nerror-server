@@ -4,6 +4,7 @@ import com.gsc.nerrorserver.api.member.dto.LoginRequestDto;
 import com.gsc.nerrorserver.api.member.dto.MailConfirmDto;
 import com.gsc.nerrorserver.api.member.dto.SignupRequestDto;
 import com.gsc.nerrorserver.api.mail.service.MailService;
+import com.gsc.nerrorserver.api.member.entity.Member;
 import com.gsc.nerrorserver.api.member.service.MemberFirebaseService;
 import com.gsc.nerrorserver.api.member.service.MemberService;
 import com.gsc.nerrorserver.global.response.ApiResponse;
@@ -45,16 +46,16 @@ public class MemberController {
 
         else {
             // 회원가입 진행
-            memberService.signup(res, dto);
-            return ApiResponse.success("msg", "회원가입에 성공했습니다.");
+            Member member = memberService.signup(res, dto);
+            return ApiResponse.success("member", member);
         }
     }
 
     @PostMapping("/login")
     public ApiResponse login(HttpServletResponse res, @RequestBody LoginRequestDto dto) throws Exception {
         try {
-            memberService.login(res, dto);
-            return ApiResponse.success("msg", "로그인에 성공했습니다.");
+            Member member = memberService.login(res, dto);
+            return ApiResponse.success("member", member);
         } catch (BadCredentialsException e) {
             e.printStackTrace();
             res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);

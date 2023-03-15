@@ -25,9 +25,13 @@ public class ApiResponse<T> {
     private final static String SUCCESS_MESSAGE = "(200) SUCCESS";
     private final static String NOT_FOUND_MESSAGE = "(400) NOT FOUND";
     private final static String UNAUTHORIZED_MESSAGE = "(401) 인증되지 않은 요청입니다";
+    private final static String FORBIDDEN_MESSAGE = "(403) 실패한 요청입니다";
     private final static String CONFLICT_MESSAGE = "(409) 이미 존재하는 회원입니다";
     private final static String FAILED_MESSAGE = "(500) 서버 오류";
 
+    public static <T> ApiResponse<T> success(Map<String, Object> map) {
+        return new ApiResponse(new ApiResponseHeader(SUCCESS, SUCCESS_MESSAGE), map);
+    }
     public static <T> ApiResponse<T> success(String name, T body) {
         Map<String, T> map = new HashMap<>();
         map.put(name, body);
@@ -54,6 +58,12 @@ public class ApiResponse<T> {
         Map<String, T> map = new HashMap<>();
         map.put(msg, body);
         return new ApiResponse(new ApiResponseHeader(UNAUTHORIZED, UNAUTHORIZED_MESSAGE), map);
+    }
+
+    public static <T> ApiResponse<T> forbidden(String msg, T body) {
+        Map<String, T> map = new HashMap<>();
+        map.put(msg, body);
+        return new ApiResponse(new ApiResponseHeader(FORBIDDEN, FORBIDDEN_MESSAGE), map);
     }
 
 }
